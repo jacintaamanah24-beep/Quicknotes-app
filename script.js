@@ -2,8 +2,20 @@ const noteForm = document.querySelector("#note-form");
 const noteInput = document.querySelector("#note-input");
 const noteCategory = document.querySelector("#note-category");
 const notesList = document.querySelector("#notes-list");
+const noteCount = document.querySelector("#note-count");
+const errorMessage = document.querySelector("#error-message");
 
 let notes = [];
+
+function updateCount() {
+    if (notes.length === 0) {
+        noteCount.textContent = "You have no notes yet.";
+    } else if (notes.length === 1) {
+        noteCount.textContent = "You have 1 note.";
+    } else {
+        noteCount.textContent = `You have ${notes.length} notes.`;
+    }
+}
 
 function render() {
     notesList.textContent = "";
@@ -26,6 +38,15 @@ function render() {
         deleteButton.textContent = "Delete";
         deleteButton.type = "button";
 
+        deleteButton.addEventListener("click", function () {
+            notes = notes.filter(function (item) {
+                return item.id !== note.id;
+            });
+
+            render();
+            updateCount();
+        });
+
         listItem.appendChild(noteText);
         listItem.appendChild(categoryLabel);
         listItem.appendChild(document.createElement("br"));
@@ -35,6 +56,8 @@ function render() {
 
         notesList.appendChild(listItem);
     });
+
+    updateCount();
 }
 
 noteForm.addEventListener("submit", function (event) {
@@ -42,6 +65,16 @@ noteForm.addEventListener("submit", function (event) {
 
     const text = noteInput.value.trim();
     const category = noteCategory.value;
+
+    if (text === "") {
+        errorMessage.textContent = "Please type a note first.";
+        return;
+    }
+
+    if (text.length > 200) {
+        errorMessage.textContent = "Notes must be 200 characters or fewer.";
+        return;
+    }
 
     const note = {
         id: Date.now(),
@@ -52,8 +85,8 @@ noteForm.addEventListener("submit", function (event) {
 
     notes.push(note);
 
-    render();
-
+    errorMessage.textContent = "";
     noteInput.value = "";
-    noteInput.focus();
+
+    render();
 });
